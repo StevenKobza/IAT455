@@ -28,6 +28,7 @@ def main():
     #read input images
     imgs = []
     for img_name in args.img:
+        
         img = cv.imread(cv.samples.findFile(img_name))
         if img is None:
             print("can't read image " + img_name)
