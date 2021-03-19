@@ -1,3 +1,3 @@
 import cv2 as cv
 
-print(cv.cuda.getDevice())
+print(cv.ocl_Device.vendorName)
