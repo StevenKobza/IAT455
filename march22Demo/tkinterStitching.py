@@ -44,6 +44,7 @@ class Application(Frame):
     def chooseImages(self):
         names = fd.askopenfilenames(filetypes = fileTypes)
         temp = ""
+        loadNames.clear()
         for i in names:
             temp += pathlib.PurePath(i).name + " "
             print(pathlib.PurePath(i).name)
@@ -76,7 +77,10 @@ def stitchFunc():
     for imgName in loadNames:
         
         cv.samples.addSamplesDataSearchPath(searchPath)
-        img_name = str(imgName.relative_to(p))
+        cv.samples.addSamplesDataSearchPath(str(imgName.parent))
+        img_name = str(imgName.name)
+        print(img_name)
+
         img = cv.imread(cv.samples.findFile(img_name))
         if img is None:
             print("can't read image ", img_name)
@@ -90,7 +94,7 @@ def stitchFunc():
         print("can't stitch images error code %d" % status)
         sys.exit(-1)
 
-    cv.imwrite(str(saveName[0].relative_to(p)), pano)
+    cv.imwrite(str(saveName[0]), pano)
     print("stitching completed successfully. %s saved!" % saveName[0].name)
 
     print('Done')
