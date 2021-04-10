@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import filedialog as fd
+from PIL import ImageTk, Image
+
 import os
 import pathlib
 
@@ -11,33 +13,36 @@ import sys
 
 modes = (cv.Stitcher_PANORAMA, cv.Stitcher_SCANS)
 
-
 class Application(Frame):
     def __init__ (self):
         self.main_window = Tk()
-        self.main_window.geometry("900x900")
-        self.main_window.title("March 22nd Demo")
+        self.main_window.geometry("1080x720")
+        self.main_window.title("Panorama Stitcher")
 
-        self.mainFrame = Frame(self.main_window, width = 900, height = 900)
+        self.mainFrame = Frame(self.main_window, width = 1080, height = 720)
         self.mainFrame.place(x = 0, y = 0)
         
-        self.chooseImagesButton = Button(self.mainFrame, text = "Choose at least two images please", font = ("Arial", 16), command = self.chooseImages)
-        self.chooseImagesButton.place(x = 100, y = 200)
+        self.chooseImagesButton = Button(self.mainFrame, text = "Select at least 2 images", font = ("Arial", 14), command = self.chooseImages)
+        self.chooseImagesButton.place(x = 50, y = 100)
 
         self.imagesChosen = StringVar()
         self.imageSaved = StringVar()
 
-        self.imagesChosenLabel = Label(self.mainFrame, textvariable = self.imagesChosen, font = ("Arial", 16))
-        self.imagesChosenLabel.place(x = 150, y = 150)
+        self.imagesChosenLabel = Label(self.mainFrame, textvariable = self.imagesChosen, font = ("Arial", 12))
+        self.imagesChosenLabel.place(x = 50, y = 150)
         
-        self.saveImageButton = Button(self.mainFrame, text = "Please select a save location", font = ("Arial", 16), command = self.saveImage)
-        self.saveImageButton.place(x = 400, y = 400)
+        self.saveImageButton = Button(self.mainFrame, text = "Choose your save location", font = ("Arial", 14), command = self.saveImage)
+        self.saveImageButton.place(x = 50, y = 220)
 
-        self.saveImageLabel = Label(self.mainFrame, textvariable = self.imageSaved, font = ("Arial", 16))
-        self.saveImageLabel.place(x = 500, y = 300)
+        self.saveImageLabel = Label(self.mainFrame, textvariable = self.imageSaved, font = ("Arial", 12))
+        self.saveImageLabel.place(x = 50, y = 270)
 
-        self.panoramaButton = Button(self.mainFrame, text = "Press to make panorama", font = ("Arial", 16), command = self.runPanorama)
-        self.panoramaButton.place(x = 400, y = 600)
+        self.panoramaButton = Button(self.mainFrame, text = "Compile Panorama", font = ("Arial", 14), command = self.runPanorama)
+        self.panoramaButton.place(x = 50, y = 400)
+
+        # saturation_slider = Scale(self.main_window, from_=0, to=200, interval=10 orient=HORIZONTAL)
+        # saturation_slider.set(100)
+        # saturation_slider.pack()
 
         mainloop()
 
@@ -64,6 +69,9 @@ class Application(Frame):
             print("Select an image to save or load first")
         else:
             stitchFunc()
+            result = Image.open(self.imageSaved.get())
+            # result.thumbnail((400, 400))
+            result.show()
 
 loadNames = []
 saveName = []
@@ -98,6 +106,7 @@ def stitchFunc():
     print("stitching completed successfully. %s saved!" % saveName[0].name)
 
     print('Done')
+    
 
 def main():
     app = Application()
