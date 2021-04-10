@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import filedialog as fd
+from PIL import ImageTk, Image
+
 import os
 import pathlib
 
@@ -10,7 +12,6 @@ import argparse
 import sys
 
 modes = (cv.Stitcher_PANORAMA, cv.Stitcher_SCANS)
-
 
 class Application(Frame):
     def __init__ (self):
@@ -39,6 +40,10 @@ class Application(Frame):
         self.panoramaButton = Button(self.mainFrame, text = "Compile Panorama", font = ("Arial", 14), command = self.runPanorama)
         self.panoramaButton.place(x = 50, y = 400)
 
+        # saturation_slider = Scale(self.main_window, from_=0, to=200, interval=10 orient=HORIZONTAL)
+        # saturation_slider.set(100)
+        # saturation_slider.pack()
+
         mainloop()
 
     def chooseImages(self):
@@ -64,6 +69,9 @@ class Application(Frame):
             print("Select an image to save or load first")
         else:
             stitchFunc()
+            result = Image.open(self.imageSaved.get())
+            # result.thumbnail((400, 400))
+            result.show()
 
 loadNames = []
 saveName = []
@@ -98,6 +106,7 @@ def stitchFunc():
     print("stitching completed successfully. %s saved!" % saveName[0].name)
 
     print('Done')
+    
 
 def main():
     app = Application()
