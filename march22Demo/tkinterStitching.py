@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import filedialog as fd
-from PIL import ImageTk, Image
+from PIL import Image, ImageShow, ImageTk
 
 import os
 import pathlib
@@ -70,10 +70,10 @@ class Application(Frame):
             print("Select an image to save or load first")
         else:
             stitchFunc()
-            print(saveName[0])
-            result = Image.open(saveName[0])
+            #print(saveName[0])
+            result = Image.show(saveName[0])
             # result.thumbnail((400, 400))
-            result.show()
+            ImageShow.show(result)
 
 
 loadNames = []
