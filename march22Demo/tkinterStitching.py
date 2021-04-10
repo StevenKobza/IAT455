@@ -58,10 +58,11 @@ class Application(Frame):
         #print(name)
 
     def saveImage(self):
+        saveName.clear()
         names = ""
         names = fd.asksaveasfilename(filetypes = fileTypes, defaultextension = '.jpg', initialfile = "result.jpg")
-        temp = pathlib.PurePath(names).name
-        saveName.append(pathlib.PurePath(names))
+        temp = pathlib.Path(names).name
+        saveName.append(pathlib.Path(names))
         self.imageSaved.set(temp)
 
     def runPanorama(self):
@@ -69,9 +70,11 @@ class Application(Frame):
             print("Select an image to save or load first")
         else:
             stitchFunc()
-            result = Image.open(self.imageSaved.get())
+            print(saveName[0])
+            result = Image.open(saveName[0])
             # result.thumbnail((400, 400))
             result.show()
+
 
 loadNames = []
 saveName = []
