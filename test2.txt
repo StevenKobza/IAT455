@@ -1,0 +1,7 @@
+graph matches_graph{
+"boat1.jpg" -- "boat2.jpg"[label="Nm=115, Ni=78, C=1.83529"];
+"boat1.jpg" -- "boat3.jpg"[label="Nm=78, Ni=58, C=1.84713"];
+"boat1.jpg" -- "boat4.jpg"[label="Nm=18, Ni=5, C=0.373134"];
+"boat1.jpg" -- "boat5.jpg"[label="Nm=14, Ni=5, C=0.409836"];
+"boat1.jpg" -- "boat6.jpg"[label="Nm=22, Ni=5, C=0.342466"];
+}

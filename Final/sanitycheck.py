@@ -1,20 +1,19 @@
-from tkinter import *
-from tkinter import filedialog as fd
-from PIL import Image, ImageShow, ImageTk
-from collections import OrderedDict
 
-import os
-import pathlib
+  
+"""
+Stitching sample (advanced)
+===========================
+Show how to use Stitcher API from python.
+"""
 
-import numpy as np
-import cv2 as cv
+# Python 2/3 compatibility
+from __future__ import print_function
 
 import argparse
-import sys
+from collections import OrderedDict
 
-import imutils
-
-modes = (cv.Stitcher_PANORAMA, cv.Stitcher_SCANS)
+import cv2 as cv
+import numpy as np
 
 EXPOS_COMP_CHOICES = OrderedDict()
 EXPOS_COMP_CHOICES['gain_blocks'] = cv.detail.ExposureCompensator_GAIN_BLOCKS
@@ -85,137 +84,207 @@ WAVE_CORRECT_CHOICES = ('horiz', 'no', 'vert',)
 
 BLEND_CHOICES = ('multiband', 'feather', 'no',)
 
+parser = argparse.ArgumentParser(
+    prog="stitching_detailed.py", description="Rotation model images stitcher"
+)
+parser.add_argument(
+    'img_names', nargs='+',
+    help="Files to stitch", type=str
+)
+parser.add_argument(
+    '--try_cuda',
+    action='store',
+    default=False,
+    help="Try to use CUDA. The default value is no. All default values are for CPU mode.",
+    type=bool, dest='try_cuda'
+)
+parser.add_argument(
+    '--work_megapix', action='store', default=0.6,
+    help="Resolution for image registration step. The default is 0.6 Mpx",
+    type=float, dest='work_megapix'
+)
+parser.add_argument(
+    '--features', action='store', default=list(FEATURES_FIND_CHOICES.keys())[0],
+    help="Type of features used for images matching. The default is '%s'." % list(FEATURES_FIND_CHOICES.keys())[0],
+    choices=FEATURES_FIND_CHOICES.keys(),
+    type=str, dest='features'
+)
+parser.add_argument(
+    '--matcher', action='store', default='homography',
+    help="Matcher used for pairwise image matching. The default is 'homography'.",
+    choices=('homography', 'affine'),
+    type=str, dest='matcher'
+)
+parser.add_argument(
+    '--estimator', action='store', default=list(ESTIMATOR_CHOICES.keys())[0],
+    help="Type of estimator used for transformation estimation. The default is '%s'." % list(ESTIMATOR_CHOICES.keys())[0],
+    choices=ESTIMATOR_CHOICES.keys(),
+    type=str, dest='estimator'
+)
+parser.add_argument(
+    '--match_conf', action='store',
+    help="Confidence for feature matching step. The default is 0.3 for ORB and 0.65 for other feature types.",
+    type=float, dest='match_conf'
+)
+parser.add_argument(
+    '--conf_thresh', action='store', default=1.0,
+    help="Threshold for two images are from the same panorama confidence.The default is 1.0.",
+    type=float, dest='conf_thresh'
+)
+parser.add_argument(
+    '--ba', action='store', default=list(BA_COST_CHOICES.keys())[0],
+    help="Bundle adjustment cost function. The default is '%s'." % list(BA_COST_CHOICES.keys())[0],
+    choices=BA_COST_CHOICES.keys(),
+    type=str, dest='ba'
+)
+parser.add_argument(
+    '--ba_refine_mask', action='store', default='xxxxx',
+    help="Set refinement mask for bundle adjustment. It looks like 'x_xxx', "
+         "where 'x' means refine respective parameter and '_' means don't refine, "
+         "and has the following format:<fx><skew><ppx><aspect><ppy>. "
+         "The default mask is 'xxxxx'. "
+         "If bundle adjustment doesn't support estimation of selected parameter then "
+         "the respective flag is ignored.",
+    type=str, dest='ba_refine_mask'
+)
+parser.add_argument(
+    '--wave_correct', action='store', default=WAVE_CORRECT_CHOICES[0],
+    help="Perform wave effect correction. The default is '%s'" % WAVE_CORRECT_CHOICES[0],
+    choices=WAVE_CORRECT_CHOICES,
+    type=str, dest='wave_correct'
+)
+parser.add_argument(
+    '--save_graph', action='store', default=None,
+    help="Save matches graph represented in DOT language to <file_name> file.",
+    type=str, dest='save_graph'
+)
+parser.add_argument(
+    '--warp', action='store', default=WARP_CHOICES[0],
+    help="Warp surface type. The default is '%s'." % WARP_CHOICES[0],
+    choices=WARP_CHOICES,
+    type=str, dest='warp'
+)
+parser.add_argument(
+    '--seam_megapix', action='store', default=0.1,
+    help="Resolution for seam estimation step. The default is 0.1 Mpx.",
+    type=float, dest='seam_megapix'
+)
+parser.add_argument(
+    '--seam', action='store', default=list(SEAM_FIND_CHOICES.keys())[0],
+    help="Seam estimation method. The default is '%s'." % list(SEAM_FIND_CHOICES.keys())[0],
+    choices=SEAM_FIND_CHOICES.keys(),
+    type=str, dest='seam'
+)
+parser.add_argument(
+    '--compose_megapix', action='store', default=-1,
+    help="Resolution for compositing step. Use -1 for original resolution. The default is -1",
+    type=float, dest='compose_megapix'
+)
+parser.add_argument(
+    '--expos_comp', action='store', default=list(EXPOS_COMP_CHOICES.keys())[0],
+    help="Exposure compensation method. The default is '%s'." % list(EXPOS_COMP_CHOICES.keys())[0],
+    choices=EXPOS_COMP_CHOICES.keys(),
+    type=str, dest='expos_comp'
+)
+parser.add_argument(
+    '--expos_comp_nr_feeds', action='store', default=1,
+    help="Number of exposure compensation feed.",
+    type=np.int32, dest='expos_comp_nr_feeds'
+)
+parser.add_argument(
+    '--expos_comp_nr_filtering', action='store', default=2,
+    help="Number of filtering iterations of the exposure compensation gains.",
+    type=float, dest='expos_comp_nr_filtering'
+)
+parser.add_argument(
+    '--expos_comp_block_size', action='store', default=32,
+    help="BLock size in pixels used by the exposure compensator. The default is 32.",
+    type=np.int32, dest='expos_comp_block_size'
+)
+parser.add_argument(
+    '--blend', action='store', default=BLEND_CHOICES[0],
+    help="Blending method. The default is '%s'." % BLEND_CHOICES[0],
+    choices=BLEND_CHOICES,
+    type=str, dest='blend'
+)
+parser.add_argument(
+    '--blend_strength', action='store', default=5,
+    help="Blending strength from [0,100] range. The default is 5",
+    type=np.int32, dest='blend_strength'
+)
+parser.add_argument(
+    '--output', action='store', default='result.jpg',
+    help="The default is 'result.jpg'",
+    type=str, dest='output'
+)
+parser.add_argument(
+    '--timelapse', action='store', default=None,
+    help="Output warped images separately as frames of a time lapse movie, "
+         "with 'fixed_' prepended to input file names.",
+    type=str, dest='timelapse'
+)
+parser.add_argument(
+    '--rangewidth', action='store', default=-1,
+    help="uses range_width to limit number of images to match with.",
+    type=int, dest='rangewidth'
+)
 
-class Application(Frame):
-    def __init__ (self):
-        self.main_window = Tk()
-        self.main_window.geometry("1080x720")
-        self.main_window.title("Panorama Stitcher")
+__doc__ += '\n' + parser.format_help()
 
-        self.mainFrame = Frame(self.main_window, width = 1080, height = 720)
-        self.mainFrame.place(x = 0, y = 0)
-        
-        self.chooseImagesButton = Button(self.mainFrame, text = "Select at least 2 images", font = ("Arial", 14), command = self.chooseImages)
-        self.chooseImagesButton.place(x = 50, y = 100)
 
-        self.imagesChosen = StringVar()
-        self.imageSaved = StringVar()
-        self.cropping = IntVar()
-
-        self.imagesChosenLabel = Label(self.mainFrame, textvariable = self.imagesChosen, font = ("Arial", 12))
-        self.imagesChosenLabel.place(x = 50, y = 150)
-        
-        self.saveImageButton = Button(self.mainFrame, text = "Choose your save location", font = ("Arial", 14), command = self.saveImage)
-        self.saveImageButton.place(x = 50, y = 220)
-
-        self.saveImageLabel = Label(self.mainFrame, textvariable = self.imageSaved, font = ("Arial", 12))
-        self.saveImageLabel.place(x = 50, y = 270)
-
-        self.panoramaButton = Button(self.mainFrame, text = "Compile Panorama", font = ("Arial", 14), command = self.runPanorama)
-        self.panoramaButton.place(x = 50, y = 400)
-
-        self.cropBox = Checkbutton(self.mainFrame, text = "Crop", font = ("Arial", 14), variable = self.cropping, onvalue = 1, offvalue = 0)
-        self.cropBox.place(x = 50, y = 600)
-
-        # saturation_slider = Scale(self.main_window, from_=0, to=200, interval=10 orient=HORIZONTAL)
-        # saturation_slider.set(100)
-        # saturation_slider.pack()
-
-        mainloop()
-
-    def chooseImages(self):
-        names = fd.askopenfilenames(filetypes = fileTypes)
-        temp = ""
-        loadNames.clear()
-        for i in names:
-            temp += pathlib.PurePath(i).name + " "
-            #print(pathlib.PurePath(i).name)
-            loadNames.append(pathlib.PurePath(i))
-            loadNamesNames.append(str(pathlib.PurePath(i).name))
-        self.imagesChosen.set(temp)
-        #print(name)
-
-    def saveImage(self):
-        saveName.clear()
-        names = ""
-        names = fd.asksaveasfilename(filetypes = fileTypes, defaultextension = '.jpg', initialfile = "result.jpg")
-        temp = pathlib.Path(names).name
-        saveName.append(pathlib.Path(names))
-        self.imageSaved.set(temp)
-
-    def runPanorama(self):
-        if (self.cropping.get() == 1):
-            crop = True
+def get_matcher(args):
+    try_cuda = args.try_cuda
+    matcher_type = args.matcher
+    if args.match_conf is None:
+        if args.features == 'orb':
+            match_conf = 0.3
         else:
-            crop = False
-        if (self.imagesChosen.get() == "" or self.imageSaved.get() == ""):
-            print("Select an image to save or load first")
-        else:
-            stitchFuncNew(crop, self)
-            #print(saveName[0])
-            result = Image.open(saveName[0])
-            # result.thumbnail((400, 400))
-            #result.show()
-            self.main_window.quit()
-
-loadNames = []
-loadNamesNames = []
-saveName = []
-fileTypes = [('Images', '.jpg'), ('Images', '.png'), ('All files', '*')]
-
-def get_args(self):
-    print("this")
-    
-    
-
-def getMatcher(self):
-    try_cuda = True
-    match_conf = 0.3
-    matcher = cv.detail.BestOf2NearestMatcher_create(try_cuda, match_conf)
+            match_conf = 0.65
+    else:
+        match_conf = args.match_conf
+    range_width = args.rangewidth
+    if matcher_type == "affine":
+        matcher = cv.detail_AffineBestOf2NearestMatcher(False, try_cuda, match_conf)
+    elif range_width == -1:
+        matcher = cv.detail.BestOf2NearestMatcher_create(try_cuda, match_conf)
+    else:
+        matcher = cv.detail.BestOf2NearestRangeMatcher_create(range_width, try_cuda, match_conf)
     return matcher
 
-def getCompensator(self):
-    expos_comp_type = EXPOS_COMP_CHOICES['gain_blocks']
+
+def get_compensator(args):
+    expos_comp_type = EXPOS_COMP_CHOICES[args.expos_comp]
     compensator = cv.detail.ExposureCompensator_createDefault(expos_comp_type)
     return compensator
 
-def stitchFuncNew(crop, self):
-    #set up search
-    path = pathlib.PurePath(os.getcwd())
-    pIn = path / 'Final'
-    searchPath = str(pIn)
-    cv.samples.addSamplesDataSearchPath(searchPath)
-    cv.samples.addSamplesDataSearchPath(str(loadNames[0].parent))
 
-
-    #args = parser.parse_args()
-    img_names = loadNamesNames
+def main():
+    args = parser.parse_args()
+    img_names = args.img_names
     print(img_names)
-    work_megapix = 0.6
-    seam_megapix = 0.1
-    compose_megapix = -1
-    conf_thresh = 0.3
-    ba_refine_mask = 'xxxxx'
-    wave_correct = 'horiz'
-    save_graph = 'Final/text2.txt'
+    work_megapix = args.work_megapix
+    seam_megapix = args.seam_megapix
+    compose_megapix = args.compose_megapix
+    conf_thresh = args.conf_thresh
+    ba_refine_mask = args.ba_refine_mask
+    wave_correct = args.wave_correct
     if wave_correct == 'no':
         do_wave_correct = False
     else:
         do_wave_correct = True
-    if save_graph is None:
+    if args.save_graph is None:
         save_graph = False
     else:
         save_graph = True
-    warp_type = 'spherical'
-    blend_type = 'multiblend'
-    blend_strength = 5
-    result_name = str(saveName[0])
-    timelapse = None
-    if timelapse is not None:
+    warp_type = args.warp
+    blend_type = args.blend
+    blend_strength = args.blend_strength
+    result_name = args.output
+    if args.timelapse is not None:
         timelapse = True
-        if timelapse == "as_is":
+        if args.timelapse == "as_is":
             timelapse_type = cv.detail.Timelapser_AS_IS
-        elif timelapse == "crop":
+        elif args.timelapse == "crop":
             timelapse_type = cv.detail.Timelapser_CROP
         else:
             print("Bad timelapse method")
@@ -223,7 +292,7 @@ def stitchFuncNew(crop, self):
             exit()
     else:
         timelapse = False
-    finder = FEATURES_FIND_CHOICES['orb']()
+    finder = FEATURES_FIND_CHOICES[args.features]()
     seam_work_aspect = 1
     full_img_sizes = []
     features = []
@@ -256,11 +325,12 @@ def stitchFuncNew(crop, self):
         img = cv.resize(src=full_img, dsize=None, fx=seam_scale, fy=seam_scale, interpolation=cv.INTER_LINEAR_EXACT)
         images.append(img)
 
-    matcher = getMatcher(self)
+    matcher = get_matcher(args)
     p = matcher.apply2(features)
     matcher.collectGarbage()
+
     if save_graph:
-        with open(save_graph, 'w') as fh:
+        with open(args.save_graph, 'w') as fh:
             fh.write(cv.detail.matchesGraphAsString(img_names, p, conf_thresh))
 
     indices = cv.detail.leaveBiggestComponent(features, p, 0.3)
@@ -280,7 +350,7 @@ def stitchFuncNew(crop, self):
         cv.waitKey(0)
         exit()
 
-    estimator = ESTIMATOR_CHOICES['homography']()
+    estimator = ESTIMATOR_CHOICES[args.estimator]()
     b, cameras = estimator.apply(features, p, None)
     if not b:
         print("Homography estimation failed.")
@@ -289,7 +359,7 @@ def stitchFuncNew(crop, self):
     for cam in cameras:
         cam.R = cam.R.astype(np.float32)
 
-    adjuster = BA_COST_CHOICES['ray']()
+    adjuster = BA_COST_CHOICES[args.ba]()
     adjuster.setConfThresh(1)
     refine_mask = np.zeros((3, 3), np.uint8)
     if ba_refine_mask[0] == 'x':
@@ -352,10 +422,10 @@ def stitchFuncNew(crop, self):
         imgf = img.astype(np.float32)
         images_warped_f.append(imgf)
 
-    compensator = getCompensator(self)
+    compensator = get_compensator(args)
     compensator.feed(corners=corners, images=images_warped, masks=masks_warped)
 
-    seam_finder = SEAM_FIND_CHOICES['gc_colorgrad']
+    seam_finder = SEAM_FIND_CHOICES[args.seam]
     seam_finder.find(images_warped_f, corners, masks_warped)
     compose_scale = 1
     corners = []
@@ -436,55 +506,10 @@ def stitchFuncNew(crop, self):
         cv.waitKey()
     cv.waitKey(0)
     print("Done")
-    
 
-# def stitchFunc(crop):
-#     imgs = []
-#     p = pathlib.PurePath(os.getcwd())
-#     pIn = p / 'march22Demo'
-#     searchPath = str(pIn)
-#     for imgName in loadNames:
-        
-#         cv.samples.addSamplesDataSearchPath(searchPath)
-#         cv.samples.addSamplesDataSearchPath(str(imgName.parent))
-#         img_name = str(imgName.name)
-#         #print(img_name)
-
-#         img = cv.imread(cv.samples.findFile(img_name))
-#         if img is None:
-#             print("can't read image ", img_name)
-#             sys.exit(-1)
-#         imgs.append(img)
-
-#     stitcher = cv.createStitcher() if imutils.is_cv3() else cv.Stitcher_create()
-#     #stitcher = cv.Stitcher.create(cv.Stitcher_PANORAMA)
-#     status, pano = stitcher.stitch(imgs)
-
-#     if status != cv.Stitcher_OK:
-#         print("can't stitch images error code %d" % status)
-#         sys.exit(-1)
-
-#     print(crop)
-#     if (crop == True):
-#         print("cropping")
-#         stitched = cv.copyMakeBorder(pano, 10, 10, 10, 10, cv.BORDER_CONSTANT, (0, 0, 0))
-
-#         gray = cv.cvtColor(stitched, cv.COLOR_BGR2GRAY)
-#         thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY)[1]
-        
-#         cv.namedWindow("thresh", cv.WINDOW_NORMAL)
-#         cv.imshow("thresh", thresh)
-#         cv.waitKey(0)
-#     #cv.imwrite(str(saveName[0]), pano)
-#     #cv.imshow("Stitched", pano)
-#     print("stitching completed successfully. %s saved!" % saveName[0].name)
-
-#     print('Done')
-#     cv.destroyAllWindows()
-    
-
-def main():
-    app = Application()
 
 if __name__ == '__main__':
+    print(__doc__)
     main()
+    cv.waitKey(0)
+    cv.destroyAllWindows()
