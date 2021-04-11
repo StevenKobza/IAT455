@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import filedialog as fd
 from PIL import Image, ImageShow, ImageTk
+#from tkinter_custom_button import TkinterCustomButton
 
 import os
 import pathlib
@@ -16,33 +17,51 @@ modes = (cv.Stitcher_PANORAMA, cv.Stitcher_SCANS)
 class Application(Frame):
     def __init__ (self):
         self.main_window = Tk()
-        self.main_window.geometry("1080x720")
+        #self.main_window.geometry("1200x500")
         self.main_window.title("Panorama Stitcher")
-
-        self.mainFrame = Frame(self.main_window, width = 1080, height = 720)
-        self.mainFrame.place(x = 0, y = 0)
+        self.mainFrame = Frame(self.main_window, bg='grey23')
+        self.mainFrame.grid(padx=20, pady=20, sticky='nsew')
+        self.mainFrame.configure(bg='grey23')
         
-        self.chooseImagesButton = Button(self.mainFrame, text = "Select at least 2 images", font = ("Arial", 14), command = self.chooseImages)
-        self.chooseImagesButton.place(x = 50, y = 100)
-
         self.imagesChosen = StringVar()
         self.imageSaved = StringVar()
 
-        self.imagesChosenLabel = Label(self.mainFrame, textvariable = self.imagesChosen, font = ("Arial", 12))
-        self.imagesChosenLabel.place(x = 50, y = 150)
+        self.chooseImagesButton = Button(self.mainFrame, padx=5, pady=5, 
+            bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
+            text = "Select 2+ images", font = ("Roboto", 14), command = self.chooseImages)
+        #self.chooseImagesButton.place(x = 50, y = 100)
+        self.chooseImagesButton.grid(row=1, column=1)
+
+        self.imagesChosenLabel = Label(self.mainFrame, textvariable = self.imagesChosen, font = ("Roboto", 10), bg='grey23', fg='white')
+        #self.imagesChosenLabel.place(x = 50, y = 150)
+        self.imagesChosenLabel.grid(row=2, column=1)
         
-        self.saveImageButton = Button(self.mainFrame, text = "Choose your save location", font = ("Arial", 14), command = self.saveImage)
-        self.saveImageButton.place(x = 50, y = 220)
+        self.saveImageButton = Button(self.mainFrame, padx=5, pady=5,
+            bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
+            text = "Save to", font = ("Roboto", 14), command = self.saveImage)
+        #self.saveImageButton.place(x = 50, y = 220)
+        self.saveImageButton.grid(row=1, column=2)
 
-        self.saveImageLabel = Label(self.mainFrame, textvariable = self.imageSaved, font = ("Arial", 12))
-        self.saveImageLabel.place(x = 50, y = 270)
+        self.saveImageLabel = Label(self.mainFrame, textvariable = self.imageSaved, font = ("Roboto", 10), bg='grey23', fg='white')
+        #self.saveImageLabel.place(x = 50, y = 270)
+        self.saveImageLabel.grid(row=2, column=2)
 
-        self.panoramaButton = Button(self.mainFrame, text = "Compile Panorama", font = ("Arial", 14), command = self.runPanorama)
-        self.panoramaButton.place(x = 50, y = 400)
+        self.panoramaButton = Button(self.mainFrame, padx=5, pady=5,
+            bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
+            text = "Compile Panorama", font = ("Roboto", 14), command = self.runPanorama)
+        #self.panoramaButton.place(x = 50, y = 400)
+        self.panoramaButton.grid(row=1, column=3)
 
-        # saturation_slider = Scale(self.main_window, from_=0, to=200, interval=10 orient=HORIZONTAL)
-        # saturation_slider.set(100)
-        # saturation_slider.pack()
+        self.img = PhotoImage(self.imageSaved.get())
+        self.img1 = self.img.subsample(20, 20)
+        Label(self.mainFrame, image = self.img1).grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
+
+        self.satLabel = Label(self.mainFrame, text="Saturation slider", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.satLabel.grid(row=3, column=2)
+        self.saturation_slider = Scale(self.main_window, length=300, from_=-100, to=100, tickinterval=10, orient=HORIZONTAL, bg="grey23", fg="white")
+        self.saturation_slider.grid(padx=10, pady=10, row=3, column=0)
+        self.saturation_slider.set(0)
+        
 
         mainloop()
 
@@ -71,7 +90,8 @@ class Application(Frame):
         else:
             stitchFunc()
             #print(saveName[0])
-            result = Image.show(saveName[0])
+            result = Image.open(self.imageSaved.get())
+            # result = Image.show(saveName[0])
             # result.thumbnail((400, 400))
             result.show()
 
