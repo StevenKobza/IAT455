@@ -91,6 +91,7 @@ class Application(Frame):
         self.main_window = Tk()
         self.main_window.geometry("1080x720")
         self.main_window.title("Panorama Stitcher")
+        self.main_window.configure(bg='grey23')
 
         self.mainFrame = Frame(self.main_window, bg='grey23')
         self.mainFrame.grid(padx=20, pady=20, sticky='nsew')
