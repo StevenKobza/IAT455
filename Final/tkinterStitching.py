@@ -579,7 +579,10 @@ def stitchFuncNew(crop, self):
             inputConc = np.concatenate((inputConc, inputImgs[i]), axis=1)
         #inputConc = np.concatenate((inputConc, result), axis=0)
         cv.namedWindow("Input Images", cv.WINDOW_NORMAL)
-        cv.resizeWindow("Input Images", 1920, 1080)
+        temp = inputImgs[0].shape[0]/6
+        temp2 = inputConc.shape[1]/6
+        newSize = (temp2, temp)
+        cv.resizeWindow("Input Images", newSize)
         cv.imshow("Input Images", inputConc)
         cv.waitKey()
 
