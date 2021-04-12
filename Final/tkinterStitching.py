@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog as fd
+from tkinter import messagebox
 from PIL import Image, ImageShow, ImageTk
 from collections import OrderedDict
 
@@ -14,13 +15,10 @@ import sys
 
 import imutils
 
-modes = (cv.Stitcher_PANORAMA, cv.Stitcher_SCANS)
-
+#setting up the options for Stitcher Detailed from OpenCV
 EXPOS_COMP_CHOICES = OrderedDict()
 EXPOS_COMP_CHOICES['gain_blocks'] = cv.detail.ExposureCompensator_GAIN_BLOCKS
 EXPOS_COMP_CHOICES['gain'] = cv.detail.ExposureCompensator_GAIN
-#EXPOS_COMP_CHOICES['channel'] = cv.detail.ExposureCompensator_CHANNELS
-#EXPOS_COMP_CHOICES['channel_blocks'] = cv.detail.ExposureCompensator_CHANNELS_BLOCKS
 EXPOS_COMP_CHOICES['no'] = cv.detail.ExposureCompensator_NO
 
 BA_COST_CHOICES = OrderedDict()
@@ -30,7 +28,6 @@ BA_COST_CHOICES['affine'] = cv.detail_BundleAdjusterAffinePartial
 BA_COST_CHOICES['no'] = cv.detail_NoBundleAdjuster
 
 FEATURES_FIND_CHOICES = OrderedDict()
-# if SURF not available, ORB is default
 FEATURES_FIND_CHOICES['orb'] = cv.ORB.create
 try:
     FEATURES_FIND_CHOICES['sift'] = cv.xfeatures2d_SIFT.create
@@ -50,30 +47,16 @@ SEAM_FIND_CHOICES['gc_color'] = cv.detail_GraphCutSeamFinder('COST_COLOR')
 SEAM_FIND_CHOICES['gc_colorgrad'] = cv.detail_GraphCutSeamFinder('COST_COLOR_GRAD')
 SEAM_FIND_CHOICES['dp_color'] = cv.detail_DpSeamFinder('COLOR')
 SEAM_FIND_CHOICES['dp_colorgrad'] = cv.detail_DpSeamFinder('COLOR_GRAD')
-SEAM_FIND_CHOICES['voronoi'] = cv.detail.SeamFinder_createDefault(cv.detail.SeamFinder_VORONOI_SEAM)
 SEAM_FIND_CHOICES['no'] = cv.detail.SeamFinder_createDefault(cv.detail.SeamFinder_NO)
 
 ESTIMATOR_CHOICES = OrderedDict()
 ESTIMATOR_CHOICES['homography'] = cv.detail_HomographyBasedEstimator
-ESTIMATOR_CHOICES['affine'] = cv.detail_AffineBasedEstimator
 
 WARP_CHOICES = (
     'spherical',
-    'plane',
-    'affine',
     'cylindrical',
     'fisheye',
     'stereographic',
-    'compressedPlaneA2B1',
-    'compressedPlaneA1.5B1',
-    'compressedPlanePortraitA2B1',
-    'compressedPlanePortraitA1.5B1',
-    'paniniA2B1',
-    'paniniA1.5B1',
-    'paniniPortraitA2B1',
-    'paniniPortraitA1.5B1',
-    'mercator',
-    'transverseMercator',
 )
 
 WAVE_CORRECT_CHOICES = ('horiz', 'no', 'vert',)
@@ -92,6 +75,7 @@ class Application(Frame):
         self.mainFrame.grid(padx=20, pady=20, sticky='nsew')
         self.mainFrame.configure(bg='grey23')
 
+        #Variables
         self.imagesChosen = StringVar()
         self.imageSaved = StringVar()
         self.cropping = IntVar()
@@ -100,53 +84,40 @@ class Application(Frame):
         self.workMegapix = DoubleVar()
         self.seamMegapix = DoubleVar()
 
+        #Buttons + Labls. Setting them along a grid for good viewing
         self.chooseImagesButton = Button(self.mainFrame, padx=5, pady=5, 
             bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
             text = "Select 2+ images", font = ("Roboto", 14), command = self.chooseImages)
-        #self.chooseImagesButton.place(x = 50, y = 100)
         self.chooseImagesButton.grid(row=1, column=1)
 
+        #Images that have been chosen
         self.imagesChosenLabel = Label(self.mainFrame, textvariable = self.imagesChosen, font = ("Roboto", 10), bg='grey23', fg='white')
-        #self.imagesChosenLabel.place(x = 50, y = 150)
         self.imagesChosenLabel.grid(row=2, column=1)
         
+        #Selecting where to save
         self.saveImageButton = Button(self.mainFrame, padx=5, pady=5,
             bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
             text = "Save to", font = ("Roboto", 14), command = self.saveImage)
-        #self.saveImageButton.place(x = 50, y = 220)
         self.saveImageButton.grid(row=1, column=2)
 
+        #Name of that image
         self.saveImageLabel = Label(self.mainFrame, textvariable = self.imageSaved, font = ("Roboto", 10), bg='grey23', fg='white')
-        #self.saveImageLabel.place(x = 50, y = 270)
         self.saveImageLabel.grid(row=2, column=2)
 
+        #Run the panorama
         self.panoramaButton = Button(self.mainFrame, padx=5, pady=5,
             bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
             text = "Compile Panorama", font = ("Roboto", 14), command = self.runPanorama)
-        #self.panoramaButton.place(x = 50, y = 400)
         self.panoramaButton.grid(row=1, column=3)
-        #img = PhotoImage(str(pIn) + "/result.jpg" size = str(img1.width) + "x")
-        #img = PhotoImage(Image.open(str(pIn) + "/result.jpg"))
-        picture_label = Label(self.mainFrame)
-        picture_label.photo = PhotoImage(Image.open("result.jpg"))
-        picture_label.grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
-        #self.img1 = self.img.subsample(20, 20)
-        #Label(self.mainFrame, image = img).grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
 
-        # self.sizeOptBox = Listbox(self.main_window, bg="grey20", fg="white", selectbackground="grey40", 
-        #     selectmode=SINGLE, font=(14), height=5) #setting listbox style to show up to 5 lines at once
-        # #listbox items in order they appear
-        # self.sizeOptBox.insert(1, "Small")
-        # self.sizeOptBox.insert(2, "Medium")
-        # self.sizeOptBox.insert(3, "Large")
-        # self.sizeOptBox.grid(padx=10, pady=10, row=4, column=1, sticky="w")
-
+        #Match confidence label
         self.matchConfLabel = Label(self.mainFrame, text="Match Confidence Slider", font = ("Roboto", 12), bg='grey23', fg='white')
         self.matchConfLabel.grid(row=3, column=2)
         self.matchConfSlider = Scale(self.mainFrame, length=300, from_=0.0, to=1.0, tickinterval=0.1, resolution = 0.01, variable = self.matchConf, orient=HORIZONTAL, bg="grey23", fg="white")
         self.matchConfSlider.grid(padx=10, pady=10, row=3, column=0)
         self.matchConfSlider.set(0.3)
 
+        #Confidence Threshold label and slider
         self.confThreshLabel = Label(self.mainFrame, text="Confidence Threshold Slider", font = ("Roboto", 12), bg='grey23', fg='white')
         self.confThreshLabel.grid(row=4, column=2)
         self.confThreshSlider = Scale(self.mainFrame, length=300, from_=0.0, to=1.0, tickinterval=0.1, resolution = 0.01, variable = self.confThresh, orient=HORIZONTAL, bg="grey23", fg="white")
@@ -241,17 +212,19 @@ class Application(Frame):
         temp = ""
         loadNames.clear()
         for i in names:
+            #Adding the names that are being loaded in, in an array for future use. Using PurePath to swap between different OSes easily
             temp += pathlib.PurePath(i).name + " "
-            #print(pathlib.PurePath(i).name)
             loadNames.append(pathlib.PurePath(i))
             loadNamesNames.append(str(pathlib.PurePath(i).name))
+        #setting the string variable
         self.imagesChosen.set(temp)
-        #print(name)
 
     def saveImage(self):
         saveName.clear()
         names = ""
+        #Opening a dialogue like the previous one.
         names = fd.asksaveasfilename(filetypes = fileTypes, defaultextension = '.jpg', initialfile = "result.jpg")
+        #Using pathlib again
         temp = pathlib.Path(names).name
         saveName.append(pathlib.Path(names))
         self.imageSaved.set(temp)
@@ -262,6 +235,7 @@ class Application(Frame):
         else:
             crop = False
 
+        #Getting the current selection for the following listboxes and if there isn't anything selected, just selecting the default option.
         if (self.seamListBox.curselection() == ()):
             options.append("gc_color")
         else:
@@ -297,15 +271,11 @@ class Application(Frame):
         else:
             options.append(self.featureListBox.get(self.featureListBox.curselection()))
 
-        print(options)
         if (self.imagesChosen.get() == "" or self.imageSaved.get() == ""):
-            print("Select an image to save or load first")
+            messagebox.showerror("Select Images", "Select an image to save or load first")
         else:
             stitchFuncNew(crop, self)
-            #print(saveName[0])
             result = Image.open(saveName[0])
-            # result.thumbnail((400, 400))
-            #result.show()
             self.main_window.quit()
 
 loadNames = []
@@ -588,52 +558,6 @@ def stitchFuncNew(crop, self):
         cv.waitKey()
     cv.waitKey(0)
     print("Done")
-    
-
-# def stitchFunc(crop):
-#     imgs = []
-#     p = pathlib.PurePath(os.getcwd())
-#     pIn = p / 'march22Demo'
-#     searchPath = str(pIn)
-#     for imgName in loadNames:
-        
-#         cv.samples.addSamplesDataSearchPath(searchPath)
-#         cv.samples.addSamplesDataSearchPath(str(imgName.parent))
-#         img_name = str(imgName.name)
-#         #print(img_name)
-
-#         img = cv.imread(cv.samples.findFile(img_name))
-#         if img is None:
-#             print("can't read image ", img_name)
-#             sys.exit(-1)
-#         imgs.append(img)
-
-#     stitcher = cv.createStitcher() if imutils.is_cv3() else cv.Stitcher_create()
-#     #stitcher = cv.Stitcher.create(cv.Stitcher_PANORAMA)
-#     status, pano = stitcher.stitch(imgs)
-
-#     if status != cv.Stitcher_OK:
-#         print("can't stitch images error code %d" % status)
-#         sys.exit(-1)
-
-#     print(crop)
-#     if (crop == True):
-#         print("cropping")
-#         stitched = cv.copyMakeBorder(pano, 10, 10, 10, 10, cv.BORDER_CONSTANT, (0, 0, 0))
-
-#         gray = cv.cvtColor(stitched, cv.COLOR_BGR2GRAY)
-#         thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY)[1]
-        
-#         cv.namedWindow("thresh", cv.WINDOW_NORMAL)
-#         cv.imshow("thresh", thresh)
-#         cv.waitKey(0)
-#     #cv.imwrite(str(saveName[0]), pano)
-#     #cv.imshow("Stitched", pano)
-#     print("stitching completed successfully. %s saved!" % saveName[0].name)
-
-#     print('Done')
-#     cv.destroyAllWindows()
-    
 
 def main():
     app = Application()
