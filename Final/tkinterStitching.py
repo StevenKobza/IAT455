@@ -30,11 +30,6 @@ BA_COST_CHOICES['affine'] = cv.detail_BundleAdjusterAffinePartial
 BA_COST_CHOICES['no'] = cv.detail_NoBundleAdjuster
 
 FEATURES_FIND_CHOICES = OrderedDict()
-try:
-    cv.xfeatures2d_SURF.create() # check if the function can be called
-    FEATURES_FIND_CHOICES['surf'] = cv.xfeatures2d_SURF.create
-except (AttributeError, cv.error) as e:
-    print("SURF not available")
 # if SURF not available, ORB is default
 FEATURES_FIND_CHOICES['orb'] = cv.ORB.create
 try:
@@ -130,10 +125,13 @@ class Application(Frame):
             text = "Compile Panorama", font = ("Roboto", 14), command = self.runPanorama)
         #self.panoramaButton.place(x = 50, y = 400)
         self.panoramaButton.grid(row=1, column=3)
-
-        self.img = PhotoImage(self.imageSaved.get())
-        self.img1 = self.img.subsample(20, 20)
-        Label(self.mainFrame, image = self.img1).grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
+        #img = PhotoImage(str(pIn) + "/result.jpg" size = str(img1.width) + "x")
+        #img = PhotoImage(Image.open(str(pIn) + "/result.jpg"))
+        picture_label = Label(self.mainFrame)
+        picture_label.photo = PhotoImage(Image.open("result.jpg"))
+        picture_label.grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
+        #self.img1 = self.img.subsample(20, 20)
+        #Label(self.mainFrame, image = img).grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
 
         self.matchConfLabel = Label(self.mainFrame, text="Match Confidence Slider", font = ("Roboto", 12), bg='grey23', fg='white')
         self.matchConfLabel.grid(row=3, column=2)
@@ -161,24 +159,53 @@ class Application(Frame):
 
         self.seamLabel = Label(self.mainFrame, text="Seam Estimation Algorithm", font = ("Roboto", 12), bg='grey23', fg='white')
         self.seamLabel.grid(row=7, column=2)
+        self.seamListBox = Listbox(self.mainFrame, height = 5, width = 35, font = ("Roboto", 12), bg='grey23', fg = 'white', selectmode=SINGLE)
+        self.seamListBox.insert(1, "gc_color")
+        self.seamListBox.insert(2, "gc_colorgrad")
+        self.seamListBox.insert(3, "dp_color")
+        self.seamListBox.insert(4, "dp_colorgrad")
+        self.seamListBox.insert(6, "no")
+        self.seamListBox.grid(row = 7, column = 0)
+        
 
         self.warpLabel = Label(self.mainFrame, text="Warp Type", font = ("Roboto", 12), bg='grey23', fg='white')
         self.warpLabel.grid(row=8, column=2)
+        self.warpListBox = Listbox(self.mainFrame, height = 4, width = 35, font = ("Roboto", 12), bg = 'grey23', fg = 'white', selectmode=SINGLE)
+        self.warpListBox.insert(1, "Spherical")
+        self.warpListBox.insert(2, "Cylindrical")
+        self.warpListBox.insert(3, "Fisheye")
+        self.warpListBox.insert(4, "Stereographic")
+        self.warpListBox.grid(row=8, column = 0)
 
         self.waveCorrLabel = Label(self.mainFrame, text="Wave Correction", font = ("Roboto", 12), bg='grey23', fg='white')
         self.waveCorrLabel.grid(row=9, column=2)
+        self.waveCorrListBox = Listbox(self.mainFrame, height = 5, width = 35, font = ("Roboto", 12), bg = 'grey23', fg = 'white', selectmode=SINGLE)
+        self.waveCorrListBox.insert(1, "Horizontal")
+        self.waveCorrListBox.insert(2, "Vertical")
+        self.waveCorrListBox.insert(3, "None")
+        self.waveCorrListBox.grid(row=9, column = 0)
 
         self.blendTypeLabel = Label(self.mainFrame, text="Blend Type", font = ("Roboto", 12), bg='grey23', fg='white')
         self.blendTypeLabel.grid(row=10, column=2)
+        self.blendListBox = Listbox(self.mainFrame, height = 5, width = 35, font = ("Roboto", 12), bg = 'grey23', fg = 'white', selectmode=SINGLE)
+        self.blendListBox.grid(row=10, column = 0)
 
         self.exposureCompLabel = Label(self.mainFrame, text="Exposure Compensation", font = ("Roboto", 12), bg='grey23', fg='white')
         self.exposureCompLabel.grid(row=11, column=2)
+        self.exposCompListBox = Listbox(self.mainFrame, height = 5, width = 35, font = ("Roboto", 12), bg = 'grey23', fg = 'white', selectmode=SINGLE)
+        self.exposCompListBox.grid(row=11, column = 0)
 
         self.baCostLabel = Label(self.mainFrame, text="BA Cost", font = ("Roboto", 12), bg='grey23', fg='white')
         self.baCostLabel.grid(row=12, column=2)
+        self.baCostListBox = Listbox(self.mainFrame, height = 5, width = 35, font = ("Roboto", 12), bg = 'grey23', fg = 'white', selectmode=SINGLE)
+        self.baCostListBox.grid(row=12, column = 0)
 
         self.featureFindLabel = Label(self.mainFrame, text="Feature Finder", font = ("Roboto", 12), bg='grey23', fg='white')
         self.featureFindLabel.grid(row=13, column=2)
+        self.featureListBox = Listbox(self.mainFrame, height = 5, width = 35, font = ("Roboto", 12), bg = 'grey23', fg = 'white', selectmode=SINGLE)
+        self.featureListBox.grid(row=13, column = 0)
+
+
         mainloop()
 
     def chooseImages(self):
