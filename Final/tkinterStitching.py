@@ -100,6 +100,10 @@ class Application(Frame):
         self.imagesChosen = StringVar()
         self.imageSaved = StringVar()
         self.cropping = IntVar()
+        self.matchConf = DoubleVar()
+        self.confThresh = DoubleVar()
+        self.workMegapix = DoubleVar()
+        self.seamMegapix = DoubleVar()
 
         self.chooseImagesButton = Button(self.mainFrame, padx=5, pady=5, 
             bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
@@ -131,11 +135,50 @@ class Application(Frame):
         self.img1 = self.img.subsample(20, 20)
         Label(self.mainFrame, image = self.img1).grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
 
-        self.satLabel = Label(self.mainFrame, text="Saturation slider", font = ("Roboto", 12), bg='grey23', fg='white')
-        self.satLabel.grid(row=3, column=2)
-        self.saturation_slider = Scale(self.main_window, length=300, from_=-100, to=100, tickinterval=10, orient=HORIZONTAL, bg="grey23", fg="white")
-        self.saturation_slider.grid(padx=10, pady=10, row=3, column=0)
-        self.saturation_slider.set(0)
+        self.matchConfLabel = Label(self.mainFrame, text="Match Confidence Slider", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.matchConfLabel.grid(row=3, column=2)
+        self.matchConfSlider = Scale(self.mainFrame, length=300, from_=0.0, to=1.0, tickinterval=0.1, resolution = 0.01, variable = self.matchConf, orient=HORIZONTAL, bg="grey23", fg="white")
+        self.matchConfSlider.grid(padx=10, pady=10, row=3, column=0)
+        self.matchConfSlider.set(0.3)
+
+        self.confThreshLabel = Label(self.mainFrame, text="Confidence Threshold Slider", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.confThreshLabel.grid(row=4, column=2)
+        self.confThreshSlider = Scale(self.mainFrame, length=300, from_=0.0, to=1.0, tickinterval=0.1, resolution = 0.01, variable = self.confThresh, orient=HORIZONTAL, bg="grey23", fg="white")
+        self.confThreshSlider.grid(padx=10, pady=10, row=4, column=0)
+        self.confThreshSlider.set(0.3)
+
+        self.workMegapixLabel = Label(self.mainFrame, text="Megapixels to work with", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.workMegapixLabel.grid(row=5, column=2)
+        self.workMegapixSlider = Scale(self.mainFrame, length=300, from_=0.0, to=5, tickinterval=0.5, resolution = 0.1, variable = self.workMegapix, orient=HORIZONTAL, bg="grey23", fg="white")
+        self.workMegapixSlider.grid(padx=10, pady=10, row=5, column=0)
+        self.workMegapixSlider.set(0.6)
+
+        self.seamMegapixLabel = Label(self.mainFrame, text="Megapixels to detect seams with", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.seamMegapixLabel.grid(row=6, column=2)
+        self.seamMegapixSlider = Scale(self.mainFrame, length=300, from_=0.0, to=5, tickinterval=0.5, resolution = 0.1, variable = self.seamMegapix, orient=HORIZONTAL, bg="grey23", fg="white")
+        self.seamMegapixSlider.grid(padx=10, pady=10, row=6, column=0)
+        self.seamMegapixSlider.set(0.1)
+
+        self.seamLabel = Label(self.mainFrame, text="Seam Estimation Algorithm", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.seamLabel.grid(row=7, column=2)
+
+        self.warpLabel = Label(self.mainFrame, text="Warp Type", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.warpLabel.grid(row=8, column=2)
+
+        self.waveCorrLabel = Label(self.mainFrame, text="Wave Correction", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.waveCorrLabel.grid(row=9, column=2)
+
+        self.blendTypeLabel = Label(self.mainFrame, text="Blend Type", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.blendTypeLabel.grid(row=10, column=2)
+
+        self.exposureCompLabel = Label(self.mainFrame, text="Exposure Compensation", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.exposureCompLabel.grid(row=11, column=2)
+
+        self.baCostLabel = Label(self.mainFrame, text="BA Cost", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.baCostLabel.grid(row=12, column=2)
+
+        self.featureFindLabel = Label(self.mainFrame, text="Feature Finder", font = ("Roboto", 12), bg='grey23', fg='white')
+        self.featureFindLabel.grid(row=13, column=2)
         mainloop()
 
     def chooseImages(self):
@@ -185,7 +228,7 @@ def get_args(self):
 
 def getMatcher(self):
     try_cuda = True
-    match_conf = 0.3
+    match_conf = self.matchConf.get()
     matcher = cv.detail.BestOf2NearestMatcher_create(try_cuda, match_conf)
     return matcher
 
@@ -206,10 +249,10 @@ def stitchFuncNew(crop, self):
     #args = parser.parse_args()
     img_names = loadNamesNames
     print(img_names)
-    work_megapix = 0.6
-    seam_megapix = 0.1
+    work_megapix = self.workMegapix.get()
+    seam_megapix = self.seamMegapix.get()
     compose_megapix = -1
-    conf_thresh = 0.3
+    conf_thresh = self.confThresh.get()
     ba_refine_mask = 'xxxxx'
     wave_correct = 'horiz'
     save_graph = 'Final/text2.txt'
