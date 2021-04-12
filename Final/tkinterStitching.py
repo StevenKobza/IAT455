@@ -281,7 +281,7 @@ class Application(Frame):
         else:
             stitchFuncNew(crop, self)
             result = Image.open(saveName[0])
-            result.show("Finally")
+            #result.show("Finally")
             self.main_window.quit()
 
 loadNames = []
@@ -577,13 +577,15 @@ def stitchFuncNew(crop, self):
         inputConc = np.concatenate((inputImgs[0], inputImgs[1]), axis=1)
         for i in range(2, len(inputImgs)):
             inputConc = np.concatenate((inputConc, inputImgs[i]), axis=1)
-        #inputConc = np.concatenate((inputConc, result), axis=0)
+        #Creating a named withdo
         cv.namedWindow("Input Images", cv.WINDOW_NORMAL)
-        temp = inputImgs[0].shape[0]/6
-        temp2 = inputConc.shape[1]/6
+        temp = int(inputImgs[0].shape[0]/10)
+        temp2 = int(inputConc.shape[1]/10)
         newSize = (temp2, temp)
+        #Showing the images
         cv.resizeWindow("Input Images", newSize)
         cv.imshow("Input Images", inputConc)
+        cv.imshow("outputImage", dst)
         cv.waitKey()
 
     for i in range(len(features)):
