@@ -1,7 +1,6 @@
 from tkinter import *
 from tkinter import filedialog as fd
 from PIL import Image, ImageShow, ImageTk
-#from tkinter_custom_button import TkinterCustomButton
 
 import os
 import pathlib
@@ -19,9 +18,9 @@ class Application(Frame):
         self.main_window = Tk()
         #self.main_window.geometry("1200x500")
         self.main_window.title("Panorama Stitcher")
+        self.main_window.configure(bg='grey23')
         self.mainFrame = Frame(self.main_window, bg='grey23')
         self.mainFrame.grid(padx=20, pady=20, sticky='nsew')
-        self.mainFrame.configure(bg='grey23')
         
         self.imagesChosen = StringVar()
         self.imageSaved = StringVar()
@@ -29,39 +28,46 @@ class Application(Frame):
         self.chooseImagesButton = Button(self.mainFrame, padx=5, pady=5, 
             bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
             text = "Select 2+ images", font = ("Roboto", 14), command = self.chooseImages)
-        #self.chooseImagesButton.place(x = 50, y = 100)
         self.chooseImagesButton.grid(row=1, column=1)
 
         self.imagesChosenLabel = Label(self.mainFrame, textvariable = self.imagesChosen, font = ("Roboto", 10), bg='grey23', fg='white')
-        #self.imagesChosenLabel.place(x = 50, y = 150)
         self.imagesChosenLabel.grid(row=2, column=1)
         
         self.saveImageButton = Button(self.mainFrame, padx=5, pady=5,
             bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
             text = "Save to", font = ("Roboto", 14), command = self.saveImage)
-        #self.saveImageButton.place(x = 50, y = 220)
         self.saveImageButton.grid(row=1, column=2)
 
         self.saveImageLabel = Label(self.mainFrame, textvariable = self.imageSaved, font = ("Roboto", 10), bg='grey23', fg='white')
-        #self.saveImageLabel.place(x = 50, y = 270)
         self.saveImageLabel.grid(row=2, column=2)
 
         self.panoramaButton = Button(self.mainFrame, padx=5, pady=5,
             bg='grey45', fg='white', activebackground='grey55', activeforeground='white', 
             text = "Compile Panorama", font = ("Roboto", 14), command = self.runPanorama)
-        #self.panoramaButton.place(x = 50, y = 400)
         self.panoramaButton.grid(row=1, column=3)
 
+        """
         self.img = PhotoImage(self.imageSaved.get())
         self.img1 = self.img.subsample(20, 20)
         Label(self.mainFrame, image = self.img1).grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
+        """
 
+        """
+        self.saturation_slider = Scale(self.main_window, length=300, from_=-100, to=100, 
+            tickinterval=10, orient=HORIZONTAL, bg="grey20", fg="white")
+        self.saturation_slider.grid(padx=10, pady=10, row=4, column=2)
+        self.saturation_slider.set(0)
         self.satLabel = Label(self.mainFrame, text="Saturation slider", font = ("Roboto", 12), bg='grey23', fg='white')
         self.satLabel.grid(row=3, column=2)
-        self.saturation_slider = Scale(self.main_window, length=300, from_=-100, to=100, tickinterval=10, orient=HORIZONTAL, bg="grey23", fg="white")
-        self.saturation_slider.grid(padx=10, pady=10, row=3, column=0)
-        self.saturation_slider.set(0)
-        
+        """
+
+        self.sizeOptBox = Listbox(self.main_window, bg="grey20", fg="white", selectbackground="grey40", 
+            selectmode=SINGLE, font=(14), height=5) #setting listbox style to show up to 5 lines at once
+        #listbox items in order they appear
+        self.sizeOptBox.insert(1, "Small")
+        self.sizeOptBox.insert(2, "Medium")
+        self.sizeOptBox.insert(3, "Large")
+        self.sizeOptBox.grid(padx=10, pady=10, row=4, column=1, sticky="w")
 
         mainloop()
 
@@ -94,6 +100,9 @@ class Application(Frame):
             # result = Image.show(saveName[0])
             # result.thumbnail((400, 400))
             result.show()
+            self.img = PhotoImage(file=r"result.jpg")
+            #self.img1 = self.img.subsample(90, 50)
+            Label(self.mainFrame, image = self.img, width=90, height=50).grid(row = 3, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
 
 
 loadNames = []
