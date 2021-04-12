@@ -52,14 +52,14 @@ class Application(Frame):
         Label(self.mainFrame, image = self.img1).grid(row = 0, column = 4, columnspan = 2, rowspan = 2, padx = 5, pady = 5)
         """
 
-        """
+        
         self.saturation_slider = Scale(self.main_window, length=300, from_=-100, to=100, 
             tickinterval=10, orient=HORIZONTAL, bg="grey20", fg="white")
         self.saturation_slider.grid(padx=10, pady=10, row=4, column=2)
         self.saturation_slider.set(0)
         self.satLabel = Label(self.mainFrame, text="Saturation slider", font = ("Roboto", 12), bg='grey23', fg='white')
         self.satLabel.grid(row=3, column=2)
-        """
+        
 
         self.sizeOptBox = Listbox(self.main_window, bg="grey20", fg="white", selectbackground="grey40", 
             selectmode=SINGLE, font=(14), height=5) #setting listbox style to show up to 5 lines at once
