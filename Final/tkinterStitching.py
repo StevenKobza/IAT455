@@ -84,7 +84,7 @@ BLEND_CHOICES = ('multiband', 'feather', 'no',)
 class Application(Frame):
     def __init__ (self):
         self.main_window = Tk()
-        self.main_window.geometry("1080x720")
+        self.main_window.geometry("1400x950")
         self.main_window.title("Panorama Stitcher")
         self.main_window.configure(bg='grey23')
 
@@ -167,69 +167,69 @@ class Application(Frame):
 
         self.seamLabel = Label(self.mainFrame, text="Seam Estimation Algorithm", font = ("Roboto", 12), bg='grey23', fg='white')
         self.seamLabel.grid(row=7, column=2)
-        self.seamListBox = Listbox(self.mainFrame, height = 5, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE)
+        self.seamListBox = Listbox(self.mainFrame, height = 5, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE, exportselection = 0)
         self.seamListBox.insert(1, "gc_color")
         self.seamListBox.insert(2, "gc_colorgrad")
         self.seamListBox.insert(3, "dp_color")
         self.seamListBox.insert(4, "dp_colorgrad")
-        self.seamListBox.insert(6, "None")
+        self.seamListBox.insert(6, "no")
         self.seamListBox.grid(row = 7, column = 0)
         self.seamListBox.activate(1)
         
 
         self.warpLabel = Label(self.mainFrame, text="Warp Type", font = ("Roboto", 12), bg='grey23', fg='white')
         self.warpLabel.grid(row=8, column=2)
-        self.warpListBox = Listbox(self.mainFrame, height = 4, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE)
-        self.warpListBox.insert(1, "Spherical")
-        self.warpListBox.insert(2, "Cylindrical")
-        self.warpListBox.insert(3, "Fisheye")
-        self.warpListBox.insert(4, "Stereographic")
+        self.warpListBox = Listbox(self.mainFrame, height = 4, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE, exportselection = 0)
+        self.warpListBox.insert(1, "spherical")
+        self.warpListBox.insert(2, "cylindrical")
+        self.warpListBox.insert(3, "fisheye")
+        self.warpListBox.insert(4, "stereographic")
         self.warpListBox.grid(row=8, column = 0)
         self.warpListBox.activate(1)
 
         self.waveCorrLabel = Label(self.mainFrame, text="Wave Correction", font = ("Roboto", 12), bg='grey23', fg='white')
         self.waveCorrLabel.grid(row=9, column=2)
-        self.waveCorrListBox = Listbox(self.mainFrame, height = 3, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE)
-        self.waveCorrListBox.insert(1, "Horizontal")
-        self.waveCorrListBox.insert(2, "Vertical")
-        self.waveCorrListBox.insert(3, "None")
+        self.waveCorrListBox = Listbox(self.mainFrame, height = 3, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE, exportselection = 0)
+        self.waveCorrListBox.insert(1, "horiz")
+        self.waveCorrListBox.insert(2, "vert")
+        self.waveCorrListBox.insert(3, "no")
         self.waveCorrListBox.grid(row=9, column = 0)
         self.waveCorrListBox.activate(1)
 
         self.blendTypeLabel = Label(self.mainFrame, text="Blend Type", font = ("Roboto", 12), bg='grey23', fg='white')
         self.blendTypeLabel.grid(row=10, column=2)
-        self.blendListBox = Listbox(self.mainFrame, height = 3, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE)
-        self.blendListBox.insert(1, "Multiband")
-        self.blendListBox.insert(2, "Feather")
-        self.blendListBox.insert(3, "None")
+        self.blendListBox = Listbox(self.mainFrame, height = 3, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE, exportselection = 0)
+        self.blendListBox.insert(1, "multiband")
+        self.blendListBox.insert(2, "feather")
+        self.blendListBox.insert(3, "no")
         self.blendListBox.grid(row=10, column = 0)
         self.blendListBox.activate(1)
 
         self.exposureCompLabel = Label(self.mainFrame, text="Exposure Compensation", font = ("Roboto", 12), bg='grey23', fg='white')
         self.exposureCompLabel.grid(row=11, column=2)
-        self.exposCompListBox = Listbox(self.mainFrame, height = 3, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE)
-        self.exposCompListBox.insert(1, "Gain Blocks")
-        self.exposCompListBox.insert(2, "Gain")
-        self.exposCompListBox.insert(3, "None")
+        self.exposCompListBox = Listbox(self.mainFrame, height = 3, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE, exportselection = 0)
+        self.exposCompListBox.insert(1, "gain_blocks")
+        self.exposCompListBox.insert(2, "gain")
+        self.exposCompListBox.insert(3, "no")
         self.exposCompListBox.grid(row=11, column = 0)
         self.exposCompListBox.activate(1)
 
         self.baCostLabel = Label(self.mainFrame, text="BA Cost", font = ("Roboto", 12), bg='grey23', fg='white')
         self.baCostLabel.grid(row=12, column=2)
-        self.baCostListBox = Listbox(self.mainFrame, height = 3, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE)
-        self.baCostListBox.insert(1, "Ray")
-        self.baCostListBox.insert(2, "Reproj")
-        self.baCostListBox.insert(3, "None")
+        self.baCostListBox = Listbox(self.mainFrame, height = 3, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE, exportselection = 0)
+        self.baCostListBox.insert(1, "ray")
+        self.baCostListBox.insert(2, "reproj")
+        self.baCostListBox.insert(3, "no")
         self.baCostListBox.grid(row=12, column = 0)
         self.baCostListBox.activate(1)
 
         self.featureFindLabel = Label(self.mainFrame, text="Feature Finder", font = ("Roboto", 12), bg='grey23', fg='white')
         self.featureFindLabel.grid(row=13, column=2)
-        self.featureListBox = Listbox(self.mainFrame, height = 4, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE)
-        self.featureListBox.insert(1, "Orb")
-        self.featureListBox.insert(2, "Sift")
-        self.featureListBox.insert(3, "Brisk")
-        self.featureListBox.insert(4, "Akaze")
+        self.featureListBox = Listbox(self.mainFrame, height = 4, width = 35, font = ("Roboto", 12), bg="grey20", fg="white", selectbackground="grey40", selectmode=SINGLE, exportselection = 0)
+        self.featureListBox.insert(1, "orb")
+        self.featureListBox.insert(2, "sift")
+        self.featureListBox.insert(3, "brisk")
+        self.featureListBox.insert(4, "akaze")
         self.featureListBox.grid(row=13, column = 0)
         self.featureListBox.activate(1)
 
@@ -261,6 +261,43 @@ class Application(Frame):
             crop = True
         else:
             crop = False
+
+        if (self.seamListBox.curselection() == ()):
+            options.append("gc_color")
+        else:
+            options.append(self.seamListBox.get(self.seamListBox.curselection()))
+
+        if (self.warpListBox.curselection() == ()):
+            options.append("spherical")
+        else:
+            options.append(self.warpListBox.get(self.warpListBox.curselection()))
+
+        if (self.waveCorrListBox.curselection() == ()):
+            options.append("horiz")
+        else:
+            options.append(self.waveCorrListBox.get(self.waveCorrListBox.curselection()))
+
+        if (self.blendListBox.curselection() == ()):
+            options.append("multiband")
+        else:
+            options.append(self.blendListBox.get(self.blendListBox.curselection()))
+
+        if (self.exposCompListBox.curselection() == ()):
+            options.append("gain_blocks")
+        else:
+            options.append(self.exposCompListBox.get(self.exposCompListBox.curselection()))
+
+        if (self.baCostListBox.curselection() == ()):
+            options.append("ray")
+        else:
+            options.append(self.baCostListBox.get(self.baCostListBox.curselection()))
+
+        if (self.featureListBox.curselection() == ()):
+            options.append("orb")
+        else:
+            options.append(self.featureListBox.get(self.featureListBox.curselection()))
+
+        print(options)
         if (self.imagesChosen.get() == "" or self.imageSaved.get() == ""):
             print("Select an image to save or load first")
         else:
@@ -275,20 +312,18 @@ loadNames = []
 loadNamesNames = []
 saveName = []
 fileTypes = [('Images', '.jpg'), ('Images', '.png'), ('All files', '*')]
-
-def get_args(self):
-    print("this")
-    
+options = []    
     
 
 def getMatcher(self):
-    try_cuda = True
+    try_cuda = False
     match_conf = self.matchConf.get()
     matcher = cv.detail.BestOf2NearestMatcher_create(try_cuda, match_conf)
     return matcher
 
 def getCompensator(self):
-    expos_comp_type = EXPOS_COMP_CHOICES['gain_blocks']
+    
+    expos_comp_type = EXPOS_COMP_CHOICES[options[4]]
     compensator = cv.detail.ExposureCompensator_createDefault(expos_comp_type)
     return compensator
 
@@ -301,7 +336,6 @@ def stitchFuncNew(crop, self):
     cv.samples.addSamplesDataSearchPath(str(loadNames[0].parent))
 
 
-    #args = parser.parse_args()
     img_names = loadNamesNames
     print(img_names)
     work_megapix = self.workMegapix.get()
@@ -309,20 +343,24 @@ def stitchFuncNew(crop, self):
     compose_megapix = -1
     conf_thresh = self.confThresh.get()
     ba_refine_mask = 'xxxxx'
-    wave_correct = 'horiz'
+    wave_correct = options[2]
     save_graph = 'Final/text2.txt'
+
     if wave_correct == 'no':
         do_wave_correct = False
     else:
         do_wave_correct = True
+
     if save_graph is None:
         save_graph = False
     else:
         save_graph = True
-    warp_type = 'spherical'
-    blend_type = 'multiblend'
+
+    warp_type = options[1]
+    blend_type = options[3]
     blend_strength = 5
     result_name = str(saveName[0])
+
     timelapse = None
     if timelapse is not None:
         timelapse = True
@@ -336,7 +374,8 @@ def stitchFuncNew(crop, self):
             exit()
     else:
         timelapse = False
-    finder = FEATURES_FIND_CHOICES['orb']()
+
+    finder = FEATURES_FIND_CHOICES[options[6]]()
     seam_work_aspect = 1
     full_img_sizes = []
     features = []
@@ -402,7 +441,7 @@ def stitchFuncNew(crop, self):
     for cam in cameras:
         cam.R = cam.R.astype(np.float32)
 
-    adjuster = BA_COST_CHOICES['ray']()
+    adjuster = BA_COST_CHOICES[options[5]]()
     adjuster.setConfThresh(1)
     refine_mask = np.zeros((3, 3), np.uint8)
     if ba_refine_mask[0] == 'x':
@@ -468,7 +507,7 @@ def stitchFuncNew(crop, self):
     compensator = getCompensator(self)
     compensator.feed(corners=corners, images=images_warped, masks=masks_warped)
 
-    seam_finder = SEAM_FIND_CHOICES['gc_colorgrad']
+    seam_finder = SEAM_FIND_CHOICES[options[0]]
     seam_finder.find(images_warped_f, corners, masks_warped)
     compose_scale = 1
     corners = []
